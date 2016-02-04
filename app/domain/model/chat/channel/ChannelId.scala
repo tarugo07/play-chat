@@ -12,7 +12,7 @@ case class ChannelId(value: Long) extends ValueObject {
 
 case class UndefinedChannelId() {
 
-  def toChatRoomId: ChannelId = {
+  def toChannelId: ChannelId = {
     ChannelId(value = ChannelId.undefinedValue)
   }
 
