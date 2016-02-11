@@ -5,6 +5,8 @@ CREATE TABLE account (
     name VARCHAR(128) NOT NULL,
     password VARCHAR(128) NOT NULL,
     mail_adress VARCHAR(256) NOT NULL,
+    create_time TIMESTAMP NOT NULL,
+    update_time TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (mail_adress)
 );
