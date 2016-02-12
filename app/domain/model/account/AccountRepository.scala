@@ -4,7 +4,7 @@ import scala.util.Try
 
 trait AccountRepository {
 
-  def nextIdentity(): AccountId
+  def nextIdentity(): Try[AccountId]
 
   def accountOfIdentity(id: AccountId): Try[Account]
 
