@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS `play_chat`.`account` (
     `name` VARCHAR(128) NOT NULL,
     `password` VARCHAR(128) NOT NULL,
     `mail_adress` VARCHAR(256) NOT NULL,
-    `create_time` TIMESTAMP NOT NULL,
-    `update_time` TIMESTAMP NOT NULL,
+    `create_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 )
   ENGINE = InnoDB
