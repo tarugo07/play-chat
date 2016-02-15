@@ -29,7 +29,7 @@ class AnormAccountRepository extends AccountRepository {
     }
   }
 
-  private def create(account: Account): Try[Int] = Try {
+  private def create(account: Account): Int = {
     DB.withConnection { implicit conn =>
       SQL(
         """
@@ -47,7 +47,7 @@ class AnormAccountRepository extends AccountRepository {
     }
   }
 
-  private def update(account: Account): Try[Int] = Try {
+  private def update(account: Account): Int = {
     DB.withConnection { implicit conn =>
       SQL(
         """
@@ -94,13 +94,14 @@ class AnormAccountRepository extends AccountRepository {
   }
 
   override def save(account: Account): Try[Account] = Try {
-    val newAccount = if (account.id.isUndefined) {
-      account.copy(id = nextIdentity().get)
+    if (account.id.isUndefined) {
+      val newAccount = account.copy(id = nextIdentity().get)
+      this.create(newAccount)
+      newAccount
     } else {
+      this.update(account)
       account
     }
-    val result = if (account.id.isUndefined) create(newAccount) else update(newAccount)
-    result.map(_ => newAccount).get
   }
 
 }
