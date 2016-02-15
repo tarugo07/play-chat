@@ -20,30 +20,30 @@ case class AccountName(value: String) extends ValueObject {
   require(value.length > 0 && value.length <= 128)
 }
 
-case class Password(value: String) extends ValueObject {
+case class AccountPassword(value: String) extends ValueObject {
   val pattern = """\w{8,128}"""
   require(value.matches(pattern))
 }
 
-case class MailAddress(address: String) extends ValueObject {
+case class AccountMail(value: String) extends ValueObject {
   val pattern = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"""
-  require(address.length <= 256)
-  require(address.matches(address))
+  require(value.length <= 256)
+  require(value.matches(value))
 }
 
 // TODO: 後ほど、case classをやめる
-case class Account(id: AccountId, name: AccountName, password: Password, mailAddress: MailAddress) extends Entity {
+case class Account(id: AccountId, name: AccountName, password: AccountPassword, mail: AccountMail) extends Entity {
 
   def changeAccountName(newName: AccountName): Account = {
     this.copy(name = newName)
   }
 
-  def changePassword(newPassword: Password): Account = {
+  def changePassword(newPassword: AccountPassword): Account = {
     this.copy(password = newPassword)
   }
 
-  def changeMailAddress(newMailAddress: MailAddress): Account = {
-    this.copy(mailAddress = newMailAddress)
+  def changeMailAddress(newMailAddress: AccountMail): Account = {
+    this.copy(mail = newMailAddress)
   }
 
 }
