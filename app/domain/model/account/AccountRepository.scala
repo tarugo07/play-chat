@@ -8,7 +8,7 @@ trait AccountRepository {
 
   def accountOfIdentity(id: AccountId): Try[Account]
 
-  def accountOfMailAddress(mail: AccountMail): Try[Account]
+  def accountOfMail(mail: AccountMail): Try[Account]
 
   def save(account: Account): Try[Account]
 

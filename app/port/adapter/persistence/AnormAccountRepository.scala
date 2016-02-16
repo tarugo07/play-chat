@@ -85,7 +85,7 @@ class AnormAccountRepository extends AccountRepository {
     result.getOrElse(throw EntityNotFoundException(message = s"id = ${id.value}"))
   }
 
-  override def accountOfMailAddress(mail: AccountMail): Try[Account] = Try {
+  override def accountOfMail(mail: AccountMail): Try[Account] = Try {
     val result = DB.withConnection() { implicit conn =>
       SQL("SELECT * FROM account WHERE mail = {mail}")
         .on('mail -> mail.value).as(accountParser.singleOpt)

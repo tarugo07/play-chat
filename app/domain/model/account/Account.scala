@@ -34,7 +34,7 @@ case class AccountMail(value: String) extends ValueObject {
 // TODO: 後ほど、case classをやめる
 case class Account(id: AccountId, name: AccountName, password: AccountPassword, mail: AccountMail) extends Entity {
 
-  def changeAccountName(newName: AccountName): Account = {
+  def changeName(newName: AccountName): Account = {
     this.copy(name = newName)
   }
 
@@ -42,8 +42,8 @@ case class Account(id: AccountId, name: AccountName, password: AccountPassword, 
     this.copy(password = newPassword)
   }
 
-  def changeMailAddress(newMailAddress: AccountMail): Account = {
-    this.copy(mail = newMailAddress)
+  def changeMail(newMail: AccountMail): Account = {
+    this.copy(mail = newMail)
   }
 
 }
