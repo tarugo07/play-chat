@@ -1,5 +1,7 @@
 package application.account
 
+import java.security.MessageDigest
+
 import domain.model.EntityNotFoundException
 import domain.model.account._
 
@@ -10,10 +12,14 @@ case class RegisterAccountCommand(name: String, password: String, mail: String)
 class AccountApplicationService(accountRepository: AccountRepository) {
 
   def registerAccount(command: RegisterAccountCommand): Try[Account] = {
+    // TODO: ハッシュ化見直し
+    val password = MessageDigest.getInstance("SHA-512")
+      .digest(command.password.getBytes).map("%02x".format(_)).mkString
+
     val account = Account(
       id = UndefinedId.toAccountId,
       name = AccountName(value = command.name),
-      password = AccountPassword(value = command.password),
+      password = AccountPassword(value = password),
       mail = AccountMail(value = command.mail)
     )
 
