@@ -13,9 +13,9 @@ case class SignUpAccountCommand(mail: String, password: String)
 
 case class ChangeAccountNameCommand(id: Long, name: String)
 
-case class ChangeAccountPassword(id: Long, password: String)
+case class ChangeAccountPasswordCommand(id: Long, password: String)
 
-case class ChangeAccountMail(id: Long, mail: String)
+case class ChangeAccountMailCommand(id: Long, mail: String)
 
 class AccountApplicationService(accountRepository: AccountRepository) {
 
@@ -61,14 +61,14 @@ class AccountApplicationService(accountRepository: AccountRepository) {
     } yield newAccount
   }
 
-  def changePassword(command: ChangeAccountPassword): Try[Account] = {
+  def changePassword(command: ChangeAccountPasswordCommand): Try[Account] = {
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
       newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.password)))
     } yield newAccount
   }
 
-  def changeMail(command: ChangeAccountMail): Try[Account] = {
+  def changeMail(command: ChangeAccountMailCommand): Try[Account] = {
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
       newAccount <- accountRepository.save(account.changeMail(AccountMail(command.mail)))
