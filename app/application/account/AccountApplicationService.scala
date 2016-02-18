@@ -11,6 +11,12 @@ case class SignInAccountCommand(name: String, password: String, mail: String)
 
 case class SignUpAccountCommand(mail: String, password: String)
 
+case class ChangeAccountNameCommand(id: Long, name: String)
+
+case class ChangeAccountPassword(id: Long, password: String)
+
+case class ChangeAccountMail(id: Long, mail: String)
+
 class AccountApplicationService(accountRepository: AccountRepository) {
 
   def signIn(command: SignInAccountCommand): Try[Account] = {
@@ -26,7 +32,7 @@ class AccountApplicationService(accountRepository: AccountRepository) {
     )
 
     accountRepository.accountOfMail(account.mail).map { account =>
-      throw new Exception(s"this mail has already been registered: mail = ${account.mail.value}")
+      throw new Exception(s"this mail has already been registered: mail = ${command.mail}")
     } recoverWith {
       case ex: EntityNotFoundException => accountRepository.save(account)
     }
@@ -39,12 +45,34 @@ class AccountApplicationService(accountRepository: AccountRepository) {
 
     accountRepository.accountOfMail(AccountMail(command.mail)) match {
       case Success(account) =>
-        if (account.password != AccountPassword(password)) {
-          throw new Exception(s"authentication failure: mail = ${command.mail}")
-        } else
+        if (account.password == AccountPassword(password)) {
           account
+        } else {
+          throw new Exception(s"authentication failure: mail = ${command.mail}")
+        }
       case Failure(ex) => throw ex
     }
+  }
+
+  def changeName(command: ChangeAccountNameCommand): Try[Account] = {
+    for {
+      account <- accountRepository.accountOfIdentity(AccountId(command.id))
+      newAccount <- accountRepository.save(account.changeName(AccountName(command.name)))
+    } yield newAccount
+  }
+
+  def changePassword(command: ChangeAccountPassword): Try[Account] = {
+    for {
+      account <- accountRepository.accountOfIdentity(AccountId(command.id))
+      newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.password)))
+    } yield newAccount
+  }
+
+  def changeMail(command: ChangeAccountMail): Try[Account] = {
+    for {
+      account <- accountRepository.accountOfIdentity(AccountId(command.id))
+      newAccount <- accountRepository.save(account.changeMail(AccountMail(command.mail)))
+    } yield newAccount
   }
 
 }
