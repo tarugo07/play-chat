@@ -9,12 +9,12 @@ case class ChannelId(value: Long) extends ValueObject {
   }
 }
 
-case class UndefinedChannelId() {
+object UndefinedId {
   def toChannelId: ChannelId = ChannelId(value = ChannelId.undefinedValue)
 }
 
 object ChannelId {
-  val undefinedValue = 0
+  val undefinedValue = 0L
 }
 
 case class ChannelName(name: String) extends ValueObject {
