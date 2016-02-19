@@ -8,12 +8,12 @@ case class MemberId(value: Long) extends ValueObject {
   }
 }
 
-case class UndefinedMemberId() {
+object UndefinedId {
   def toMemberId: MemberId = MemberId(value = MemberId.undefinedValue)
 }
 
 object MemberId {
-  val undefinedValue = 0
+  val undefinedValue = 0L
 }
 
 case class MemberName(name: String) extends ValueObject {
