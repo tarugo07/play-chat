@@ -12,12 +12,12 @@ case class MessageId(value: Long) extends ValueObject {
   }
 }
 
-case class UndefinedMessageId() {
+object UndefinedId {
   def toMessageId: MessageId = MessageId(value = MessageId.undefinedValue)
 }
 
 object MessageId {
-  val undefinedValue = 0
+  val undefinedValue = 0L
 }
 
 case class MessageContent(content: String) extends ValueObject {
