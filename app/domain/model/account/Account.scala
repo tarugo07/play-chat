@@ -31,8 +31,7 @@ case class AccountMail(value: String) extends ValueObject {
   require(value.matches(value))
 }
 
-// TODO: 後ほど、case classをやめる
-case class Account(id: AccountId, name: AccountName, password: AccountPassword, mail: AccountMail) extends Entity {
+class Account(val id: AccountId, val name: AccountName, val password: AccountPassword, val mail: AccountMail) extends Entity {
 
   def changeName(newName: AccountName): Account = {
     this.copy(name = newName)
@@ -44,6 +43,35 @@ case class Account(id: AccountId, name: AccountName, password: AccountPassword, 
 
   def changeMail(newMail: AccountMail): Account = {
     this.copy(mail = newMail)
+  }
+
+  def copy(id: AccountId = this.id,
+           name: AccountName = this.name,
+           password: AccountPassword = this.password,
+           mail: AccountMail = this.mail) = {
+    new Account(this.id, name, password, mail)
+  }
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Account]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Account =>
+      (that canEqual this) &&
+        id == that.id
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(id)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
+
+}
+
+object Account {
+
+  def apply(id: AccountId, name: AccountName, password: AccountPassword, mail: AccountMail): Account = {
+    new Account(id, name, password, mail)
   }
 
 }
