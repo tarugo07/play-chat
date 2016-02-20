@@ -21,7 +21,7 @@ case class ChannelName(name: String) extends ValueObject {
   require(name.length > 0 && name.length <= 128)
 }
 
-case class Channel(id: ChannelId, name: ChannelName, participants: Set[MemberId]) extends Entity {
+class Channel(val id: ChannelId, val name: ChannelName, val participants: Set[MemberId]) extends Entity {
 
   def join(member: Member): Channel = {
     this.copy(participants = participants + member.id)
@@ -33,6 +33,34 @@ case class Channel(id: ChannelId, name: ChannelName, participants: Set[MemberId]
 
   def changeName(name: ChannelName): Channel = {
     this.copy(name = name)
+  }
+
+  def copy(id: ChannelId = this.id,
+           name: ChannelName = this.name,
+           participants: Set[MemberId] = this.participants): Channel = {
+    new Channel(id, name, participants)
+  }
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Channel]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Channel =>
+      (that canEqual this) &&
+        id == that.id
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(id)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
+
+}
+
+object Channel {
+
+  def apply(id: ChannelId, name: ChannelName, participants: Set[MemberId]): Channel = {
+    new Channel(id, name, participants)
   }
 
 }
