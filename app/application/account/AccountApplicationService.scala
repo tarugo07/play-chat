@@ -71,8 +71,7 @@ class AccountApplicationService(accountRepository: AccountRepository) {
   def changeMail(command: ChangeAccountMailCommand): Try[Account] = {
     for {
       account <- accountRepository.accountOfMail(AccountMail(command.mail))
-      // TODO: Entityを修正する
-       _ = if (account.id.value != command.id && account.mail == AccountMail(command.mail))
+       _ = if (account.id != AccountId(command.id) && account.mail == AccountMail(command.mail))
          Failure(throw new Exception(s"this mail has already been registered: mail = ${command.mail}"))
       newAccount <- accountRepository.save(account.changeMail(AccountMail(command.mail)))
     } yield newAccount
