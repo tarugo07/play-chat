@@ -49,7 +49,7 @@ class Account(val id: AccountId, val name: AccountName, val password: AccountPas
            name: AccountName = this.name,
            password: AccountPassword = this.password,
            mail: AccountMail = this.mail) = {
-    new Account(this.id, name, password, mail)
+    new Account(id, name, password, mail)
   }
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Account]
