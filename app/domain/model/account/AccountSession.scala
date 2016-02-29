@@ -10,10 +10,6 @@ case class AccountSessionId(value: Long) extends ValueObject {
   }
 }
 
-object UndefinedAccountSessionId {
-  def toAccountSessionId: AccountSessionId = AccountSessionId(value = AccountSessionId.undefinedValue)
-}
-
 object AccountSessionId {
   val undefinedValue = 0L
 }

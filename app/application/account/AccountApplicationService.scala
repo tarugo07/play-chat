@@ -2,8 +2,8 @@ package application.account
 
 import java.security.MessageDigest
 
-import domain.model.EntityNotFoundException
 import domain.model.account._
+import domain.model.{EntityNotFoundException, UndefinedId}
 
 import scala.util.{Failure, Success, Try}
 

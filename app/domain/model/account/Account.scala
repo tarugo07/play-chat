@@ -8,10 +8,6 @@ case class AccountId(value: Long) extends ValueObject {
   }
 }
 
-object UndefinedId {
-  def toAccountId: AccountId = AccountId(value = AccountId.undefinedValue)
-}
-
 object AccountId {
   val undefinedValue = 0L
 }
