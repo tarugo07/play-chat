@@ -3,7 +3,9 @@
 # ~~~~
 
 # Home page
-GET     /                           port.adapter.ui.controllers.Application.index
+GET        /                    port.adapter.ui.controllers.Application.index
+
+POST       /signin              port.adapter.api.controllers.AccountController.signIn
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)

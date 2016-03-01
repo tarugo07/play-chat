@@ -45,7 +45,7 @@ class AnormAccountSessionRepository extends AccountSessionRepository {
         'id -> accountSession.id.value,
         'account_id -> accountSession.accountId.value,
         'salt -> accountSession.salt.value,
-        'expire -> accountSession.expire.time.toString
+        'expire -> Date.from(accountSession.expire.time.toInstant)
       ).executeUpdate()
     }
   }
