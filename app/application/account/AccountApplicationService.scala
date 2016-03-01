@@ -1,13 +1,15 @@
 package application.account
 
 import java.security.MessageDigest
+import java.time.{ZoneId, ZonedDateTime}
+import java.util.UUID
 
 import domain.model.account._
 import domain.model.{EntityNotFoundException, UndefinedId}
 
 import scala.util.{Failure, Success, Try}
 
-case class SignInAccountCommand(name: String, password: String, mail: String)
+case class SignInAccountCommand(mail: String, password: String)
 
 case class SignUpAccountCommand(mail: String, password: String)
 
@@ -17,25 +19,40 @@ case class ChangeAccountPasswordCommand(id: Long, password: String)
 
 case class ChangeAccountMailCommand(id: Long, mail: String)
 
-class AccountApplicationService(accountRepository: AccountRepository) {
+class AccountApplicationService(accountRepository: AccountRepository, accountSessionRepository: AccountSessionRepository) {
 
-  def signIn(command: SignInAccountCommand): Try[Account] = {
+  def signIn(command: SignInAccountCommand): Try[AccessToken] = {
+    def createAccount(account: Account): Try[Account] = {
+      accountRepository.accountOfMail(account.mail).map { _ =>
+        throw new scala.Exception(s"this mail has already been registered: mail = ${command.mail}")
+      } recoverWith {
+        case ex: EntityNotFoundException => accountRepository.save(account)
+      }
+    }
+
     // TODO: ハッシュ化見直し
     val password = MessageDigest.getInstance("SHA-512")
       .digest(command.password.getBytes).map("%02x".format(_)).mkString
 
-    val account = Account(
+    val accountMail = AccountMail(value = command.mail)
+
+    val newAccount = Account(
       id = UndefinedId.toAccountId,
-      name = AccountName(value = command.name),
+      name = AccountName(value = accountMail.value.split("@").head),
       password = AccountPassword(value = password),
-      mail = AccountMail(value = command.mail)
+      mail = accountMail
     )
 
-    accountRepository.accountOfMail(account.mail).map { account =>
-      throw new Exception(s"this mail has already been registered: mail = ${command.mail}")
-    } recoverWith {
-      case ex: EntityNotFoundException => accountRepository.save(account)
-    }
+    for {
+      account <- createAccount(newAccount)
+      newAccountSession = AccountSession(
+        id = UndefinedId.toAccountSessionId,
+        accountId = account.id,
+        salt = AccountSessionSalt(UUID.randomUUID().toString),
+        expire = AccountSessionExpire(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(AccessToken.ExpireMinutes))
+      )
+      accountSession <- accountSessionRepository.save(newAccountSession)
+    } yield AccessToken(accountSession)
   }
 
   def signUp(command: SignUpAccountCommand): Try[Account] = Try {
