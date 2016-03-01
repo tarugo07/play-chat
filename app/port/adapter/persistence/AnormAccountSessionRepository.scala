@@ -1,6 +1,7 @@
 package port.adapter.persistence
 
 import java.time.{ZoneId, ZonedDateTime}
+import java.util.Date
 
 import anorm.SqlParser._
 import anorm._
@@ -26,7 +27,7 @@ class AnormAccountSessionRepository extends AccountSessionRepository {
           id = AccountSessionId(value = id),
           accountId = AccountId(value = accountId),
           salt = AccountSessionSalt(value = salt),
-          expire = AccountSessionExpire(time = ZonedDateTime.ofInstant(expire.toInstant, ZoneId.systemDefault()))
+          expire = AccountSessionExpire(time = ZonedDateTime.ofInstant(expire.toInstant, ZoneId.of("UTC")))
         )
     }
   }
@@ -36,9 +37,9 @@ class AnormAccountSessionRepository extends AccountSessionRepository {
       SQL(
         """
           |INSERT INTO account_session
-          |  (id, account_id, salt, expire_time, create_time, update_time)
+          | (id, account_id, salt, expire_time, create_time, update_time)
           |VALUES
-          |  ({id}, {account_id}, {salt}, {expire}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          | ({id}, {account_id}, {salt}, {expire}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         """.stripMargin
       ).on(
         'id -> accountSession.id.value,
@@ -67,7 +68,7 @@ class AnormAccountSessionRepository extends AccountSessionRepository {
         'id -> accountSession.id.value,
         'account_id -> accountSession.accountId.value,
         'salt -> accountSession.salt.value,
-        'expire -> accountSession.expire.time.toString
+        'expire -> Date.from(accountSession.expire.time.toInstant)
       ).executeUpdate()
     }
   }
