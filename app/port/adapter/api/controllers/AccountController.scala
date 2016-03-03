@@ -26,9 +26,12 @@ class AccountController extends Controller {
       case (mail, password) =>
         applicationService.signIn(SignInAccountCommand(mail, password)) match {
           case Success(accessToken) =>
-            Ok(Json.obj("access_token" -> accessToken.toString))
+            Ok(Json.obj(
+              "result" -> "OK",
+              "access_token" -> accessToken.toString
+            ))
           case Failure(ex) =>
-            BadRequest(Json.obj("status" -> "NG"))
+            BadRequest(Json.obj("result" -> "NG"))
         }
     }.recoverTotal { e =>
       BadRequest(Json.obj("status" -> "NG"))

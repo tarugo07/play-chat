@@ -25,6 +25,8 @@ case class AccountMail(value: String) extends ValueObject {
   val pattern = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"""
   require(value.length <= 256)
   require(value.matches(value))
+
+  lazy val localPart = value.split("@").head
 }
 
 class Account(val id: AccountId, val name: AccountName, val password: AccountPassword, val mail: AccountMail) extends Entity {

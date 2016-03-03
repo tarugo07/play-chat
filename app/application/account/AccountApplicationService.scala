@@ -38,7 +38,7 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
 
     val newAccount = Account(
       id = UndefinedId.toAccountId,
-      name = AccountName(value = accountMail.value.split("@").head),
+      name = AccountName(value = accountMail.localPart),
       password = AccountPassword(value = password),
       mail = accountMail
     )
