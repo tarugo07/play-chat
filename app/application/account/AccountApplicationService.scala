@@ -55,7 +55,7 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
     } yield AccessToken(accountSession)
   }
 
-  def signUp(command: SignUpAccountCommand): Try[Account] = Try {
+  def signUp(command: SignUpAccountCommand): Try[AccessToken] = Try {
     // TODO: ハッシュ化見直し
     val password = MessageDigest.getInstance("SHA-512")
       .digest(command.password.getBytes).map("%02x".format(_)).mkString
@@ -63,7 +63,15 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
     accountRepository.accountOfMail(AccountMail(command.mail)) match {
       case Success(account) =>
         if (account.password == AccountPassword(password)) {
-          account
+          val newAccountSession = for {
+            accountSession <- accountSessionRepository.accountSessionOfAccountId(account.id)
+            newAccountSession = accountSession.copy(
+              salt = AccountSessionSalt(UUID.randomUUID().toString),
+              expire = AccountSessionExpire(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(AccessToken.ExpireMinutes))
+            )
+            _ <- accountSessionRepository.save(newAccountSession)
+          } yield newAccountSession
+          AccessToken(newAccountSession.get)
         } else {
           throw new Exception(s"authentication failure: mail = ${command.mail}")
         }

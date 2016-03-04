@@ -1,6 +1,6 @@
 package port.adapter.api.controllers
 
-import application.account.{AccountApplicationService, SignInAccountCommand}
+import application.account.{AccountApplicationService, SignInAccountCommand, SignUpAccountCommand}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
@@ -37,4 +37,22 @@ class AccountController extends Controller {
       BadRequest(Json.obj("status" -> "NG"))
     }
   }
+
+  def signUp = Action(parse.json) { implicit request =>
+    request.body.validate[(String, String)].map {
+      case (mail, password) =>
+        applicationService.signUp(SignUpAccountCommand(mail, password)) match {
+          case Success(accessToken) =>
+            Ok(Json.obj(
+              "result" -> "OK",
+              "access_token" -> accessToken.toString
+            ))
+          case Failure(ex) =>
+            BadRequest(Json.obj("result" -> "NG"))
+        }
+    }.recoverTotal { e =>
+      BadRequest(Json.obj("status" -> "NG"))
+    }
+  }
+
 }
