@@ -9,9 +9,9 @@ import domain.model.{EntityNotFoundException, UndefinedId}
 
 import scala.util.{Failure, Success, Try}
 
-case class SignInAccountCommand(mail: String, password: String)
-
 case class SignUpAccountCommand(mail: String, password: String)
+
+case class SignInAccountCommand(mail: String, password: String)
 
 case class ChangeAccountNameCommand(id: Long, name: String)
 
@@ -21,7 +21,7 @@ case class ChangeAccountMailCommand(id: Long, mail: String)
 
 class AccountApplicationService(accountRepository: AccountRepository, accountSessionRepository: AccountSessionRepository) {
 
-  def signIn(command: SignInAccountCommand): Try[AccessToken] = {
+  def signUp(command: SignUpAccountCommand): Try[AccessToken] = {
     def createAccount(account: Account): Try[Account] = {
       accountRepository.accountOfMail(account.mail).map { _ =>
         throw new scala.Exception(s"this mail has already been registered: mail = ${command.mail}")
@@ -55,7 +55,7 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
     } yield AccessToken(accountSession)
   }
 
-  def signUp(command: SignUpAccountCommand): Try[AccessToken] = Try {
+  def signIn(command: SignInAccountCommand): Try[AccessToken] = Try {
     // TODO: ハッシュ化見直し
     val password = MessageDigest.getInstance("SHA-512")
       .digest(command.password.getBytes).map("%02x".format(_)).mkString
