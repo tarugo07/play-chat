@@ -22,7 +22,7 @@ class AccountController extends Controller {
 
 
   def signUp = Action(parse.json) { implicit request =>
-    request.body.validate[  (String, String)].map {
+    request.body.validate[(String, String)].map {
       case (mail, password) =>
         applicationService.signUp(SignUpAccountCommand(mail, password)) match {
           case Success(accessToken) =>
