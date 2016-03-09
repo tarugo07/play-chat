@@ -10,9 +10,9 @@ object Encryption {
 
   def encrypt(value: Array[Byte], algorithm: String, secretKey: String, initVector: String, blockMode: String, padding: String): Try[Array[Byte]] = {
     Try {
-      val secretKeySpec = new SecretKeySpec(secretKey.getBytes("UTF-8"), algorithm)
-      val cipher = Cipher.getInstance(algorithm, s"/$blockMode/$padding")
-      cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(initVector.getBytes("UTF-8")))
+      val secretKeySpec = new SecretKeySpec(secretKey.getBytes, algorithm)
+      val cipher = Cipher.getInstance(s"$algorithm/$blockMode/$padding")
+      cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(initVector.getBytes))
       cipher.doFinal(value)
     } recoverWith {
       case ex: InvalidKeyException => Failure(ex)

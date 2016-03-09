@@ -1,7 +1,9 @@
 package port.adapter.api.controllers
 
 import application.account.{AccountApplicationService, SignInAccountCommand, SignUpAccountCommand}
+import org.apache.commons.codec.binary.Base64
 import play.api.libs.functional.syntax._
+import util.{Configuration, Encryption}
 import play.api.libs.json._
 import play.api.mvc._
 import port.adapter.persistence.{AnormAccountRepository, AnormAccountSessionRepository}
@@ -9,6 +11,7 @@ import port.adapter.persistence.{AnormAccountRepository, AnormAccountSessionRepo
 import scala.util.{Failure, Success}
 
 class AccountController extends Controller {
+  val accessTokenConfig = Configuration.accessTokenConfig
 
   val accountRepository = new AnormAccountRepository
   val accountSessionRepository = new AnormAccountSessionRepository
@@ -26,9 +29,18 @@ class AccountController extends Controller {
       case (mail, password) =>
         applicationService.signUp(SignUpAccountCommand(mail, password)) match {
           case Success(accessToken) =>
+            val encrypted = Encryption.encrypt(
+              accessToken.toString.getBytes("UTF-8"),
+              "Blowfish",
+              accessTokenConfig.privateKey,
+              accessTokenConfig.initVector,
+              "CBC",
+              "PKCS5Padding"
+            )
+
             Ok(Json.obj(
               "result" -> "OK",
-              "access_token" -> accessToken.toString
+              "access_token" -> Base64.encodeBase64String(encrypted.get)
             ))
           case Failure(ex) =>
             BadRequest(Json.obj("result" -> "NG"))
@@ -43,9 +55,18 @@ class AccountController extends Controller {
       case (mail, password) =>
         applicationService.signIn(SignInAccountCommand(mail, password)) match {
           case Success(accessToken) =>
+            val encrypted = Encryption.encrypt(
+              accessToken.toString.getBytes("UTF-8"),
+              "Blowfish",
+              accessTokenConfig.privateKey,
+              accessTokenConfig.initVector,
+              "CBC",
+              "PKCS5Padding"
+            )
+
             Ok(Json.obj(
               "result" -> "OK",
-              "access_token" -> accessToken.toString
+              "access_token" -> Base64.encodeBase64String(encrypted.get)
             ))
           case Failure(ex) =>
             BadRequest(Json.obj("result" -> "NG"))
