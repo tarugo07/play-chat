@@ -3,7 +3,7 @@ package port.adapter.api.controllers
 import application.account.{AccountApplicationService, SignInAccountCommand, SignUpAccountCommand}
 import org.apache.commons.codec.binary.Base64
 import play.api.libs.functional.syntax._
-import util.{Configuration, Encryption}
+import util.{Configuration, Cipher}
 import play.api.libs.json._
 import play.api.mvc._
 import port.adapter.persistence.{AnormAccountRepository, AnormAccountSessionRepository}
@@ -29,7 +29,7 @@ class AccountController extends Controller {
       case (mail, password) =>
         applicationService.signUp(SignUpAccountCommand(mail, password)) match {
           case Success(accessToken) =>
-            val encrypted = Encryption.encrypt(
+            val encrypted = Cipher.encrypt(
               accessToken.toString.getBytes("UTF-8"),
               "Blowfish",
               accessTokenConfig.privateKey,
@@ -55,7 +55,7 @@ class AccountController extends Controller {
       case (mail, password) =>
         applicationService.signIn(SignInAccountCommand(mail, password)) match {
           case Success(accessToken) =>
-            val encrypted = Encryption.encrypt(
+            val encrypted = Cipher.encrypt(
               accessToken.toString.getBytes("UTF-8"),
               "Blowfish",
               accessTokenConfig.privateKey,
