@@ -15,7 +15,7 @@ case class SignInAccountCommand(mail: String, password: String)
 
 case class ChangeAccountNameCommand(id: Long, name: String)
 
-case class ChangeAccountPasswordCommand(id: Long, password: String)
+case class ChangeAccountPasswordCommand(id: Long, currentPassword: String, newPassword: String)
 
 case class ChangeAccountMailCommand(id: Long, mail: String)
 
@@ -89,7 +89,7 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
   def changePassword(command: ChangeAccountPasswordCommand): Try[Account] = {
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
-      newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.password)))
+      newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.newPassword)))
     } yield newAccount
   }
 
