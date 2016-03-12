@@ -89,6 +89,7 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
   def changePassword(command: ChangeAccountPasswordCommand): Try[Account] = {
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
+        .filter(_.password.value == command.currentPassword)
       newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.newPassword)))
     } yield newAccount
   }
