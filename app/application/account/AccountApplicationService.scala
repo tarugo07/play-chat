@@ -55,28 +55,25 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
     } yield AccessToken(accountSession)
   }
 
-  def signIn(command: SignInAccountCommand): Try[AccessToken] = Try {
+  def signIn(command: SignInAccountCommand): Try[AccessToken] = {
     // TODO: ハッシュ化見直し
     val password = MessageDigest.getInstance("SHA-512")
       .digest(command.password.getBytes).map("%02x".format(_)).mkString
 
-    accountRepository.accountOfMail(AccountMail(command.mail)) match {
-      case Success(account) =>
-        if (account.password == AccountPassword(password)) {
-          val newAccountSession = for {
-            accountSession <- accountSessionRepository.accountSessionOfAccountId(account.id)
-            newAccountSession = accountSession.copy(
-              salt = AccountSessionSalt(UUID.randomUUID().toString),
-              expire = AccountSessionExpire(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(AccessToken.ExpireMinutes))
-            )
-            _ <- accountSessionRepository.save(newAccountSession)
-          } yield newAccountSession
-          AccessToken(newAccountSession.get)
-        } else {
-          throw new Exception(s"authentication failure: mail = ${command.mail}")
+    for {
+      account <- accountRepository.accountOfMail(AccountMail(command.mail))
+        .filter(_.password == AccountPassword(password))
+        .recoverWith {
+          case _: NoSuchElementException =>
+            Failure(new Exception(s"authentication failure: mail = ${command.mail}"))
         }
-      case Failure(ex) => throw ex
-    }
+      accountSession <- accountSessionRepository.accountSessionOfAccountId(account.id)
+      newAccountSession = accountSession.copy(
+        salt = AccountSessionSalt(UUID.randomUUID().toString),
+        expire = AccountSessionExpire(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(AccessToken.ExpireMinutes))
+      )
+      _ <- accountSessionRepository.save(newAccountSession)
+    } yield AccessToken(newAccountSession)
   }
 
   def changeName(command: ChangeAccountNameCommand): Try[Account] = {
@@ -90,6 +87,10 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
         .filter(_.password.value == command.currentPassword)
+        .recoverWith {
+          case _: NoSuchElementException =>
+            Failure(new Exception(s"invalid current password: id = ${command.id}"))
+        }
       newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.newPassword)))
     } yield newAccount
   }
