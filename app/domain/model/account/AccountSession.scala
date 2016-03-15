@@ -1,6 +1,6 @@
 package domain.model.account
 
-import java.time.ZonedDateTime
+import java.time.{ZoneId, ZonedDateTime}
 
 import domain.model.{Entity, ValueObject}
 
@@ -18,7 +18,9 @@ case class AccountSessionSalt(value: String) extends ValueObject {
   require(value.length > 0 && value.length <= 256)
 }
 
-case class AccountSessionExpire(time: ZonedDateTime) extends ValueObject
+case class AccountSessionExpire(time: ZonedDateTime) extends ValueObject {
+  def isExpired: Boolean = time.isBefore(ZonedDateTime.now(ZoneId.of("UTC")))
+}
 
 class AccountSession(val id: AccountSessionId,
                      val accountId: AccountId,
