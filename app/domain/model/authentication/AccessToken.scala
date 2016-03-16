@@ -1,9 +1,10 @@
-package domain.model.account
+package domain.model.authentication
 
 import java.security.MessageDigest
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import domain.model.ValueObject
+import domain.model.account.{AccountId, AccountSession}
 
 case class AccessToken(accountId: AccountId, hash: String, occurredOn: ZonedDateTime) extends ValueObject {
   override def toString = accountId.value.toString + "_" + hash + "_" + occurredOn.toEpochSecond

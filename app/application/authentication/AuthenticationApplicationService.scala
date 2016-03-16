@@ -1,6 +1,7 @@
 package application.authentication
 
-import domain.model.account.{AccessToken, Account, AccountRepository, AccountSessionRepository}
+import domain.model.account.{Account, AccountRepository, AccountSessionRepository}
+import domain.model.authentication.AccessToken
 
 import scala.util.{Failure, Try}
 
