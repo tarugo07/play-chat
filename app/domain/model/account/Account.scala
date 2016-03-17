@@ -64,6 +64,8 @@ class Account(val id: AccountId, val name: AccountName, val password: AccountPas
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 
+  override def toString = s"Account(id=$id, name=$name, password=$password, mail=$mail)"
+
 }
 
 object Account {
