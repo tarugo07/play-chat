@@ -32,21 +32,34 @@ trait ControllerSupport {
     ).map(Base64.encodeBase64String)
   }
 
+  def decryptAccessToken(token: String): Try[AccessToken] = {
+    Cipher.decrypt(
+      Base64.decodeBase64(token),
+      "Blowfish",
+      accessTokenConfig.privateKey,
+      accessTokenConfig.initVector,
+      "CBC",
+      "PKCS5Padding"
+    ).map(StringUtils.newStringUtf8).map { value =>
+      AccessToken.parse(value) match {
+        case Some(accessToken) => accessToken
+        case None => throw new Exception(s"illegal access token: token = $token")
+      }
+    }
+  }
+
   class AuthenticatedRequest[A](val account: Account, val request: Request[A]) extends WrappedRequest[A](request)
 
   object AuthAction extends ActionBuilder[AuthenticatedRequest] {
 
     override def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
       request.headers.get("Authorization").map { token =>
-        val decrypted = Cipher.decrypt(
-          Base64.decodeBase64(token),
-          "Blowfish",
-          accessTokenConfig.privateKey,
-          accessTokenConfig.initVector,
-          "CBC",
-          "PKCS5Padding"
-        )
-        authenticationApplicationService.authenticate(StringUtils.newStringUtf8(decrypted.get)).toOption.map { account =>
+        val accountTry = for {
+          accessToken <- decryptAccessToken(token)
+          account <- authenticationApplicationService.authenticate(accessToken)
+        } yield account
+
+        accountTry.toOption.map { account =>
           block(new AuthenticatedRequest(account, request))
         }.getOrElse(Future.successful(Unauthorized))
       }.getOrElse(Future.successful(Forbidden))
