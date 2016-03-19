@@ -25,7 +25,7 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
   def signUp(command: SignUpAccountCommand): Try[AccessToken] = {
     def createAccount(account: Account): Try[Account] = {
       accountRepository.accountOfMail(account.mail).map { _ =>
-        throw new scala.Exception(s"this mail has already been registered: mail = ${command.mail}")
+        throw new Exception(s"this mail has already been registered: mail = ${command.mail}")
       } recoverWith {
         case ex: EntityNotFoundException => accountRepository.save(account)
       }
