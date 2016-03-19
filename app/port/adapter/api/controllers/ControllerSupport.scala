@@ -59,7 +59,7 @@ trait ControllerSupport {
           account <- authenticationApplicationService.authenticate(accessToken)
         } yield account
 
-        accountTry.toOption.map { account =>
+        accountTry.map { account =>
           block(new AuthenticatedRequest(account, request))
         }.getOrElse(Future.successful(Unauthorized))
       }.getOrElse(Future.successful(Forbidden))
