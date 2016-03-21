@@ -7,14 +7,12 @@ import play.api.mvc._
 
 import scala.util.{Failure, Success}
 
-class AccountController extends Controller with ControllerSupport {
-
+class AuthenticationController extends Controller with ControllerSupport {
 
   implicit val reads: Reads[(String, String)] = (
     (__ \ "mail").read[String] and
       (__ \ "password").read[String]
     ).tupled
-
 
   def signUp = Action(parse.json) { implicit request =>
     request.body.validate[(String, String)].map {

@@ -4,9 +4,9 @@ import java.security.MessageDigest
 import java.time.{ZoneId, ZonedDateTime}
 import java.util.UUID
 
-import domain.model.{UndefinedId, EntityNotFoundException}
 import domain.model.account._
 import domain.model.authentication.AccessToken
+import domain.model.{EntityNotFoundException, UndefinedId}
 
 import scala.util.{Failure, Try}
 
