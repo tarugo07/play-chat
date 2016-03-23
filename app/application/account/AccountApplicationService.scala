@@ -1,5 +1,7 @@
 package application.account
 
+import java.security.MessageDigest
+
 import domain.model.EntityNotFoundException
 import domain.model.account._
 
@@ -11,7 +13,7 @@ case class ChangeAccountPasswordCommand(id: Long, currentPassword: String, newPa
 
 case class ChangeAccountMailCommand(id: Long, mail: String)
 
-class AccountApplicationService(accountRepository: AccountRepository, accountSessionRepository: AccountSessionRepository) {
+class AccountApplicationService(accountRepository: AccountRepository) {
 
   def changeName(command: ChangeAccountNameCommand): Try[Account] = {
     for {
@@ -21,14 +23,20 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
   }
 
   def changePassword(command: ChangeAccountPasswordCommand): Try[Account] = {
+    // TODO: ハッシュ化見直し
+    val currentPassword = MessageDigest.getInstance("SHA-512")
+        .digest(command.currentPassword.getBytes).map("%02x".format(_)).mkString
+    val newPassword = MessageDigest.getInstance("SHA-512")
+      .digest(command.newPassword.getBytes).map("%02x".format(_)).mkString
+
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
-        .filter(_.password.value == command.currentPassword)
+        .filter(_.password.value == currentPassword)
         .recoverWith {
           case _: NoSuchElementException =>
             Failure(new Exception(s"invalid current password: id = ${command.id}"))
         }
-      newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.newPassword)))
+      newAccount <- accountRepository.save(account.changePassword(AccountPassword(newPassword)))
     } yield newAccount
   }
 
