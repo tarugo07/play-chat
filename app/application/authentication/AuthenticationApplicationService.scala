@@ -1,6 +1,5 @@
 package application.authentication
 
-import java.security.MessageDigest
 import java.time.{ZoneId, ZonedDateTime}
 import java.util.UUID
 
@@ -38,10 +37,7 @@ class AuthenticationApplicationService(accountRepository: AccountRepository,
       }
     }
 
-    // TODO: ハッシュ化見直し
-    val password = MessageDigest.getInstance("SHA-512")
-      .digest(command.password.getBytes).map("%02x".format(_)).mkString
-
+    val password = AccountPassword.digest(command.password)
     val accountMail = AccountMail(value = command.mail)
 
     val newAccount = Account(
@@ -64,9 +60,7 @@ class AuthenticationApplicationService(accountRepository: AccountRepository,
   }
 
   def signIn(command: SignInAccountCommand): Try[AccessToken] = {
-    // TODO: ハッシュ化見直し
-    val password = MessageDigest.getInstance("SHA-512")
-      .digest(command.password.getBytes).map("%02x".format(_)).mkString
+    val password = AccountPassword.digest(command.password)
 
     for {
       account <- accountRepository.accountOfMail(AccountMail(command.mail))

@@ -1,7 +1,5 @@
 package application.account
 
-import java.security.MessageDigest
-
 import domain.model.EntityNotFoundException
 import domain.model.account._
 
@@ -23,11 +21,8 @@ class AccountApplicationService(accountRepository: AccountRepository) {
   }
 
   def changePassword(command: ChangeAccountPasswordCommand): Try[Account] = {
-    // TODO: ハッシュ化見直し
-    val currentPassword = MessageDigest.getInstance("SHA-512")
-        .digest(command.currentPassword.getBytes).map("%02x".format(_)).mkString
-    val newPassword = MessageDigest.getInstance("SHA-512")
-      .digest(command.newPassword.getBytes).map("%02x".format(_)).mkString
+    val currentPassword = AccountPassword.digest(command.currentPassword)
+    val newPassword = AccountPassword.digest(command.newPassword)
 
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
