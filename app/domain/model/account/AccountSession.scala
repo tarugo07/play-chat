@@ -48,6 +48,8 @@ class AccountSession(val id: AccountSessionId,
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 
+  override def toString = s"AccountSession(id=$id, accountId=$accountId, salt=$salt, expire=$expire)"
+
 }
 
 object AccountSession {

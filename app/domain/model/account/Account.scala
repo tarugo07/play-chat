@@ -1,5 +1,7 @@
 package domain.model.account
 
+import java.security.MessageDigest
+
 import domain.model.{Entity, ValueObject}
 
 case class AccountId(value: Long) extends ValueObject {
@@ -19,6 +21,12 @@ case class AccountName(value: String) extends ValueObject {
 case class AccountPassword(value: String) extends ValueObject {
   val pattern = """\w{8,128}"""
   require(value.matches(pattern))
+}
+
+object AccountPassword {
+  // TODO: ハッシュ化見直し
+  def digest(password: String): String =
+    MessageDigest.getInstance("SHA-512").digest(password.getBytes).map("%02x".format(_)).mkString
 }
 
 case class AccountMail(value: String) extends ValueObject {

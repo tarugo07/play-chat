@@ -11,7 +11,7 @@ case class ChangeAccountPasswordCommand(id: Long, currentPassword: String, newPa
 
 case class ChangeAccountMailCommand(id: Long, mail: String)
 
-class AccountApplicationService(accountRepository: AccountRepository, accountSessionRepository: AccountSessionRepository) {
+class AccountApplicationService(accountRepository: AccountRepository) {
 
   def changeName(command: ChangeAccountNameCommand): Try[Account] = {
     for {
@@ -21,14 +21,17 @@ class AccountApplicationService(accountRepository: AccountRepository, accountSes
   }
 
   def changePassword(command: ChangeAccountPasswordCommand): Try[Account] = {
+    val currentPassword = AccountPassword.digest(command.currentPassword)
+    val newPassword = AccountPassword.digest(command.newPassword)
+
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
-        .filter(_.password.value == command.currentPassword)
+        .filter(_.password.value == currentPassword)
         .recoverWith {
           case _: NoSuchElementException =>
             Failure(new Exception(s"invalid current password: id = ${command.id}"))
         }
-      newAccount <- accountRepository.save(account.changePassword(AccountPassword(command.newPassword)))
+      newAccount <- accountRepository.save(account.changePassword(AccountPassword(newPassword)))
     } yield newAccount
   }
 

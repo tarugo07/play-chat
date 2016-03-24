@@ -3,7 +3,7 @@ package port.adapter.api.controllers
 import application.authentication.AuthenticationApplicationService
 import domain.model.account.Account
 import domain.model.authentication.AccessToken
-import org.apache.commons.codec.binary.{Base64, StringUtils}
+import org.apache.commons.codec.binary.Base64
 import play.api.mvc._
 import port.adapter.persistence.{AnormAccountRepository, AnormAccountSessionRepository}
 import util.{Cipher, Configuration}
@@ -40,8 +40,8 @@ trait ControllerSupport {
       accessTokenConfig.initVector,
       "CBC",
       "PKCS5Padding"
-    ).map(StringUtils.newStringUtf8).map { value =>
-      AccessToken.parse(value) match {
+    ).map { value =>
+      AccessToken.parse(new String(value, "UTF-8")) match {
         case Some(accessToken) => accessToken
         case None => throw new Exception(s"illegal access token: token = $token")
       }
