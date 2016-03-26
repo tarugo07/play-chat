@@ -1,6 +1,6 @@
 package application.authentication
 
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.{Instant, ZoneId, ZonedDateTime}
 import java.util.UUID
 
 import domain.model.account._
@@ -37,6 +37,7 @@ class AuthenticationApplicationService(accountRepository: AccountRepository,
       }
     }
 
+    val now = ZonedDateTime.now(ZoneId.of("UTC")).toEpochSecond
     val password = AccountPassword.digest(command.password)
     val accountMail = AccountMail(value = command.mail)
 
@@ -53,13 +54,17 @@ class AuthenticationApplicationService(accountRepository: AccountRepository,
         id = UndefinedId.toAccountSessionId,
         accountId = account.id,
         salt = AccountSessionSalt(UUID.randomUUID().toString),
-        expire = AccountSessionExpire(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(AccessToken.ExpireMinutes))
+        expire = AccountSessionExpire(
+          ZonedDateTime.ofInstant(Instant.ofEpochSecond(now), ZoneId.of("UTC"))
+            .plusMinutes(AccessToken.ExpireMinutes)
+        )
       )
       accountSession <- accountSessionRepository.save(newAccountSession)
     } yield AccessToken(accountSession)
   }
 
   def signIn(command: SignInAccountCommand): Try[AccessToken] = {
+    val now = ZonedDateTime.now(ZoneId.of("UTC")).toEpochSecond
     val password = AccountPassword.digest(command.password)
 
     for {
@@ -72,7 +77,10 @@ class AuthenticationApplicationService(accountRepository: AccountRepository,
       accountSession <- accountSessionRepository.accountSessionOfAccountId(account.id)
       newAccountSession = accountSession.copy(
         salt = AccountSessionSalt(UUID.randomUUID().toString),
-        expire = AccountSessionExpire(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(AccessToken.ExpireMinutes))
+        expire = AccountSessionExpire(
+          ZonedDateTime.ofInstant(Instant.ofEpochSecond(now), ZoneId.of("UTC"))
+            .plusMinutes(AccessToken.ExpireMinutes)
+        )
       )
       _ <- accountSessionRepository.save(newAccountSession)
     } yield AccessToken(newAccountSession)
