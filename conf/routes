@@ -2,9 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET         /                                 port.adapter.ui.controllers.Application.index
-
 POST        /api/authentication/signup        port.adapter.api.controllers.AuthenticationController.signUp
 
 POST        /api/authentication/signin        port.adapter.api.controllers.AuthenticationController.signIn

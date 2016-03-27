@@ -14,7 +14,7 @@ class AccountController extends Controller with ControllerSupport {
       (__ \ "newPassword").read[String]
     ).tupled
 
-  implicit val changeNameReads: Reads[(String)] = (__ \ "name").read[String]
+  implicit val changeNameReads: Reads[String] = (__ \ "name").read[String]
 
   val accountApplicationService = new AccountApplicationService(accountRepository)
 
@@ -24,21 +24,29 @@ class AccountController extends Controller with ControllerSupport {
         val command = ChangeAccountPasswordCommand(authenticated.account.id.value, currentPassword, newPassword)
         accountApplicationService.changePassword(command) match {
           case Success(_) => Ok(Json.obj("result" -> "OK"))
-          case Failure(ex) => BadRequest(Json.obj("result" -> "NG"))
+          case Failure(ex) =>
+            println(ex.getMessage)
+            BadRequest(Json.obj("result" -> "NG"))
         }
-    }.recoverTotal { _ => BadRequest(Json.obj("status" -> "NG")) }
+    }.recoverTotal { ex =>
+      println(ex)
+      BadRequest(Json.obj("status" -> "NG"))
+    }
   }
   
   def changeName = AuthAction(parse.json) { implicit authenticated =>
-    authenticated.request.body.validate[(String)].map {
-      case (name) =>
+    println(authenticated.account)
+    println(authenticated.request)
+    val a = authenticated.request.body.validate[String].map {
+      case name: String =>
         val command = ChangeAccountNameCommand(authenticated.account.id.value, name)
         accountApplicationService.changeName(command) match {
           case Success(_) => Ok(Json.obj("result" -> "OK"))
           case Failure(ex) => InternalServerError(Json.obj("result" -> "NG"))
         }
     }.recoverTotal { _ => BadRequest(Json.obj("status" -> "NG")) }
-    
+    println(a)
+    a
   }
 
 }
