@@ -1,6 +1,6 @@
 package port.adapter.api.controllers
 
-import application.account.{AccountApplicationService, ChangeAccountNameCommand, ChangeAccountPasswordCommand}
+import application.account._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
@@ -11,6 +11,8 @@ case class ChangePassword(currentPassword: String, newPassword: String)
 
 case class ChangeName(name: String)
 
+case class ChangeMail(mail: String)
+
 class AccountController extends Controller with ControllerSupport {
 
   implicit val changePasswordReads: Reads[ChangePassword] = (
@@ -19,6 +21,8 @@ class AccountController extends Controller with ControllerSupport {
     ) (ChangePassword.apply _)
 
   implicit val changeNameReads: Reads[ChangeName] = (__ \ "name").read[String].map(ChangeName)
+
+  implicit val changeMailReads: Reads[ChangeMail] = (__ \ "mail").read[String].map(ChangeMail)
 
   val accountApplicationService = new AccountApplicationService(accountRepository)
 
@@ -52,6 +56,22 @@ class AccountController extends Controller with ControllerSupport {
     }.recoverTotal { _ =>
       BadRequest(Json.obj("status" -> "NG"))
     }
+  }
+
+  def changeMail = AuthAction(parse.json) { implicit authenticated =>
+    authenticated.request.body.validate[ChangeMail].map {
+      case changeMail =>
+        val command = ChangeAccountMailCommand(authenticated.account.id.value, changeMail.mail)
+        accountApplicationService.changeMail(command) match {
+          case Success(_) =>
+            Ok(Json.obj("result" -> "OK"))
+          case Failure(ex) =>
+            InternalServerError(Json.obj("result" -> "NG"))
+        }
+    }.recoverTotal { _ =>
+      BadRequest(Json.obj("status" -> "NG"))
+    }
+
   }
 
 }
