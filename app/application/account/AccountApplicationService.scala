@@ -35,20 +35,20 @@ class AccountApplicationService(accountRepository: AccountRepository) {
     } yield newAccount
   }
 
-  private def isRegisteredMail(id: AccountId, mail: AccountMail): Try[Boolean] = Try {
-    accountRepository.accountOfMail(mail) match {
-      case Success(account) =>
-        if (account.id != id) true
-        else false
-      case Failure(ex) =>
-        ex match {
-          case _: EntityNotFoundException => false
-          case _ => throw ex
-        }
-    }
-  }
-
   def changeMail(command: ChangeAccountMailCommand): Try[Account] = {
+    def isRegisteredMail(id: AccountId, mail: AccountMail): Try[Boolean] = Try {
+      accountRepository.accountOfMail(mail) match {
+        case Success(account) =>
+          if (account.id != id) true
+          else false
+        case Failure(ex) =>
+          ex match {
+            case _: EntityNotFoundException => false
+            case _ => throw ex
+          }
+      }
+    }
+
     for {
       account <- accountRepository.accountOfIdentity(AccountId(command.id))
       exist <- isRegisteredMail(AccountId(command.id), AccountMail(command.mail))
