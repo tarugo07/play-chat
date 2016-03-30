@@ -36,17 +36,13 @@ class AccountApplicationService(accountRepository: AccountRepository) {
   }
 
   def changeMail(command: ChangeAccountMailCommand): Try[Account] = {
-    def isRegisteredMail(id: AccountId, mail: AccountMail): Try[Boolean] = Try {
-      accountRepository.accountOfMail(mail) match {
-        case Success(account) =>
-          if (account.id != id) true
-          else false
-        case Failure(ex) =>
-          ex match {
-            case _: EntityNotFoundException => false
-            case _ => throw ex
-          }
-      }
+    def isRegisteredMail(id: AccountId, mail: AccountMail): Try[Boolean] = {
+      accountRepository.accountOfMail(mail)
+        .filter(_.id != id).map(_ => true)
+        .recover {
+          case _: NoSuchElementException => false
+          case _: EntityNotFoundException => false
+        }
     }
 
     for {
